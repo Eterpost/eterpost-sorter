@@ -32,6 +32,7 @@ describe('MailingStatsTracker', function () {
     fakeLogger = createFakeLogger();
     fakeMailingRepository = {
       getByListId: mock.fn(() => Promise.resolve(mailing)),
+      setFailure: mock.fn(() => Promise.resolve()),
       updateInTransaction: mock.fn(() => Promise.resolve(mailing))
     };
     fakeStatsRepository = {
@@ -60,7 +61,30 @@ describe('MailingStatsTracker', function () {
     it('should modify mailing info with list-id', async function () {
       const actions = await tracker.countFailure(failureInfo);
       assert.ok(fakeMailingRepository.updateInTransaction.mock.callCount() > 0);
-      assert.deepEqual(actions, ['updated mailing stats', 'updated address stats']);
+      assert.deepEqual(actions, [
+        'updated mailing stats', 'recorded the error in the mailing', 'updated address stats'
+      ]);
+    });
+
+    it('should record the error in the list of the mailing', async function () {
+      failureInfo.diagnosticCode = 'smtp; 550 5.1.1 User unknown';
+      failureInfo.spam = false;
+      await tracker.countFailure(failureInfo);
+      const [id, failure] = fakeMailingRepository.setFailure.mock.calls[0].arguments;
+      assert.equal(id, 1);
+      assert.deepEqual(failure, {
+        date: new Date(0).toISOString(),
+        diagnosticCode: 'smtp; 550 5.1.1 User unknown',
+        email: testAddress,
+        spam: false,
+        status: '5.1.1'
+      });
+    });
+
+    it('should not record the error without a mailing', async function () {
+      failureInfo.listId = null;
+      await tracker.countFailure(failureInfo);
+      assert.equal(fakeMailingRepository.setFailure.mock.callCount(), 0);
     });
 
     it('should not modify mailing stats for unknown list-id', async function () {

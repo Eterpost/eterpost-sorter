@@ -16,6 +16,19 @@ class MailingStatsTracker {
     if (failureInfo.listId) {
       mailingId = await this._modifyMailingCounters(failureInfo, actions);
     }
+    // Список ошибок рассылки: по нему mail-server показывает ошибки доставки
+    // именно этой рассылки, а не последнюю ошибку адреса в любой из них.
+    // Подставленный снаружи репозиторий может его не поддерживать
+    if (mailingId && this.mailingRepository.setFailure) {
+      await this.mailingRepository.setFailure(mailingId, {
+        date: new Date().toISOString(),
+        diagnosticCode: failureInfo.diagnosticCode,
+        email: failureInfo.recipient,
+        spam: Boolean(failureInfo.spam),
+        status: failureInfo.dsnStatus
+      });
+      actions.push('recorded the error in the mailing');
+    }
 
     await this._modifyAddressCounters(failureInfo, mailingId, actions);
 

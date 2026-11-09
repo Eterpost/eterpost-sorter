@@ -75,6 +75,19 @@ describe('Redis repositories', { skip: !REDIS_URL && 'REDIS_URL is not set' }, f
     });
   });
 
+  it('should record errors of a mailing in its own hash', async function () {
+    const repository = new RedisMailingRepository(client);
+    const failure = {
+      date: '2026-11-09T00:00:00.000Z', diagnosticCode: '550 5.1.1', email: 'a@example.com',
+      spam: false, status: '5.1.1'
+    };
+    await repository.setFailure(7, failure);
+    assert.deepEqual(
+      JSON.parse(await client.hGet('MAILING_FAILURES_7', 'a@example.com')),
+      { date: failure.date, diagnosticCode: failure.diagnosticCode, spam: false, status: '5.1.1' }
+    );
+  });
+
   it('should retry transaction when the key changes concurrently', async function () {
     await client.set('ADDRESS_STATS_r@example.com', JSON.stringify({ email: 'r@example.com' }));
     const other = client.duplicate();

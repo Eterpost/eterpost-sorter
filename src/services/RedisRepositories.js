@@ -8,6 +8,7 @@ const DEFAULT_PREFIXES = {
   addressStatsKeyPrefix: 'ADDRESS_STATS_',
   commonDataKeyPrefix: 'MAILING_COMMON_DATA_',
   idCounterKey: 'MAILING_ID_COUNTER',
+  mailingFailuresKeyPrefix: 'MAILING_FAILURES_',
   sorterStatusKey: 'MAIL_SORTER_STATUS'
 };
 
@@ -97,6 +98,13 @@ class RedisMailingRepository {
     this.commonDataKeyPrefix = prefixes.commonDataKeyPrefix ||
       DEFAULT_PREFIXES.commonDataKeyPrefix;
     this.idCounterKey = prefixes.idCounterKey || DEFAULT_PREFIXES.idCounterKey;
+    this.failuresKeyPrefix = prefixes.mailingFailuresKeyPrefix ||
+      DEFAULT_PREFIXES.mailingFailuresKeyPrefix;
+  }
+
+  // Ошибка доставки в рассылке: хеш адрес → { date, diagnosticCode, spam, status }
+  async setFailure (id, { email, ...failure }) {
+    await this.client.hSet(this.failuresKeyPrefix + id, email, JSON.stringify(failure));
   }
 
   async getByListId (listId) {
