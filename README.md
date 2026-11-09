@@ -279,6 +279,8 @@ Example of such address: `noreply+unsubscribe@some.domain`. Action: mark user as
 #### HUMAN
 Messages from humans. This category includes not only human messages, but all messages that do not belong
 to any of other categories. Such messages are forwarded to address specified in config parameter `forwardTo`.
+The forwarded letter is built anew, so the original message with all its headers is attached
+to it as `original.eml`.
 
 ### Actions on handled messages
 If message has been successfully handled (no error and message was not explicitly **skipped**)

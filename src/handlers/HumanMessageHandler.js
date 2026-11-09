@@ -37,9 +37,20 @@ class HumanMessageHandler {
     };
   }
 
+  // Письмо собирается заново, поэтому заголовки оригинала (From, Date,
+  // Message-ID, Received) теряются: оригинал целиком прикладывается вложением
   async _forwardMessage (message) {
+    const attachments = [...(message.attachments || [])];
+    if (message.source) {
+      attachments.push({
+        content: message.source,
+        contentDisposition: 'attachment',
+        contentType: 'message/rfc822',
+        filename: 'original.eml'
+      });
+    }
     await this.mailSender.sendEmail(new Email({
-      attachments: message.attachments,
+      attachments,
       headers: {},
       html: message.html,
       receivers: [{

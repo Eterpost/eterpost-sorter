@@ -48,6 +48,20 @@ describe('HumanMessageHandler', function () {
       assert.equal(result.skipped, false);
     });
 
+    it('should attach the original message', async function () {
+      message.attachments = [{ content: Buffer.from('pdf'), filename: 'offer.pdf' }];
+      message.source = Buffer.from('From: from-test@etersoft.ru\r\nSubject: Hi\r\n\r\nHello\r\n');
+      await handler.processMessage(message);
+      const sentEmail = fakeSender.sendEmail.mock.calls[0].arguments[0];
+      assert.equal(sentEmail.attachments.length, 2);
+      assert.equal(sentEmail.attachments[0].filename, 'offer.pdf');
+      const original = sentEmail.attachments[1];
+      assert.equal(original.contentType, 'message/rfc822');
+      assert.equal(original.contentDisposition, 'attachment');
+      assert.equal(original.filename, 'original.eml');
+      assert.equal(original.content, message.source);
+    });
+
     it('should set reply-to header = reply-to of original message, if set', async function () {
       await handler.processMessage(message);
       const sentEmail = fakeSender.sendEmail.mock.calls[0].arguments[0];
