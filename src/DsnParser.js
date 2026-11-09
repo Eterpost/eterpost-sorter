@@ -1,5 +1,6 @@
 const FailureTypes = require('./FailureTypes');
 const { unwrapFrom } = require('./utils');
+const { createSpamDetector } = require('./spamDetection');
 
 
 /**
@@ -7,7 +8,8 @@ const { unwrapFrom } = require('./utils');
  * почтовых серверов (DSN)
  */
 class DsnParser {
-  constructor (logger) {
+  constructor (logger, isSpam = createSpamDetector()) {
+    this.isSpam = isSpam;
     this.logger = logger;
   }
 
@@ -46,7 +48,7 @@ class DsnParser {
       listId: await this._extractListId(message),
       message,
       recipient,
-      spam: Boolean(diagnosticCode && diagnosticCode.indexOf('spam message') !== -1),
+      spam: this.isSpam(diagnosticCode),
       status: this._convertDsnStatus(status)
     };
   }

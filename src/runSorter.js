@@ -13,6 +13,7 @@ const MailboxSorterStatsCollector = require('./MailboxSorterStatsCollector');
 const UnsubscribeMessageHandler = require('./handlers/UnsubscribeMessageHandler');
 const FailureInfoParser = require('./FailureInfoParser');
 const DsnParser = require('./DsnParser');
+const { createSpamDetector } = require('./spamDetection');
 const SpecialHeaderParser = require('./SpecialHeaderParser');
 const MailingStatsTracker = require('./MailingStatsTracker');
 const SmtpMailSender = require('./services/SmtpMailSender');
@@ -158,7 +159,8 @@ function createMailboxSorter ({
 }) {
   const classifier = new MessageClassifier(config.unsubscribeAdditionalAddress);
   const failureInfoParser = new FailureInfoParser(
-    new DsnParser(logger), new SpecialHeaderParser(logger)
+    new DsnParser(logger, createSpamDetector(config.spamPatterns)),
+    new SpecialHeaderParser(logger)
   );
   const statsTracker = new MailingStatsTracker(logger, mailingRepository, addressStatsRepository);
   const mailingListDatabase = database;

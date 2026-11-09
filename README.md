@@ -230,6 +230,7 @@ YAML configs are no longer supported.
   "maxTemporaryFailures": 3, // this amount of temporary failures will lead to address exclusion from database
   "messageBatchSize": 100, // messages are loaded in batches; this is size of such batch
   "readonly": true, // readonly mode: no changes in mailbox, no changes in database
+  "spamPatterns": ["\\bspam", "unsolicited"], // optional: regular expressions for the Diagnostic-Code of a rejection as spam (see "How it works"); a built-in set by default
   "redis": { // Redis of mail-server: "url" or "host"/"port"/"db"/"password"
     "url": "redis://localhost:6379/0",
     "prefixes": {} // optional: key prefixes, the same as in mail-server config
@@ -256,6 +257,15 @@ the last status and its date are set. If error is temporary (status = 4.x.x),
 error counter is incremented in addition to actions for permanent errors.
 3. If the error is permanent or temporary error count has exceeded the threshold,
 the address is excluded from mailing database.
+
+A rejection caused by the letter or the sender rather than the address counts as
+a rejection as spam: the `spam` flag is set in the address statistics and the
+address is **not** excluded from the mailing database (the mailbox exists); such
+addresses can be selected for sending again. This is detected from the
+`Diagnostic-Code` by case-insensitive regular expressions (`spamPatterns` in the
+config). By default they match mentions of spam (mail.ru, Yandex),
+"unsolicited" (Gmail), blocklists (`blocked using`, `blocklist`, DNSBL), sender
+reputation and SPF/DKIM/DMARC checks.
 
 
 #### AUTORESPONDER
