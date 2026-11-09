@@ -307,3 +307,8 @@ interface MailingDatabase {
 ```
 
 You can implement your own database classes with any custom logic.
+
+## Bugs and feature requests
+
+Report bugs and feature requests in the Etersoft Bugzilla: product Eterpost,
+component eterpost-sorter — [file a bug](https://bugs.etersoft.ru/enter_bug.cgi?product=Eterpost&component=eterpost-sorter).

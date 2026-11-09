@@ -301,3 +301,8 @@ interface MailingDatabase {
   unsubscribeAddress (address: string): Promise<boolean>;
 }
 ```
+
+## Ошибки и пожелания
+
+Ошибки и пожелания принимаются в Bugzilla Etersoft: продукт Eterpost,
+компонент eterpost-sorter — [завести задачу](https://bugs.etersoft.ru/enter_bug.cgi?product=Eterpost&component=eterpost-sorter).
