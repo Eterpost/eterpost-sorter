@@ -14,10 +14,10 @@ class MultiDatabase {
   }
 
   // Как и драйверы, возвращает true, если адрес найден хотя бы в одной базе
-  async unsubscribeAddress (address) {
+  async unsubscribeAddress (address, mailingId) {
     let result = false;
     for (const db of this.databases) {
-      if (await db.unsubscribeAddress(address)) {
+      if (await db.unsubscribeAddress(address, mailingId)) {
         result = true;
       }
     }

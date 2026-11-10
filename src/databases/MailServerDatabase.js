@@ -18,23 +18,28 @@ class MailServerDatabase {
   }
 
   // Письмо на адрес из List-Unsubscribe — отписка только от рассылок с этим заголовком
-  async unsubscribeAddress (address) {
-    this.logger.debug('Unsubscribe emails: ' + address);
+  async unsubscribeAddress (address, mailingId) {
+    const suffix = mailingId ? ` (mailing ${mailingId})` : '';
+    this.logger.debug('Unsubscribe emails: ' + address + suffix);
     if (this.readonly) {
       return true;
     }
-    return this._disableEmailsForAddress(address, true);
+    return this._disableEmailsForAddress(address, true, mailingId);
   }
 
   // Удаляет адрес из рассылок mail-server (POST /mailings/unsubscribe).
   // Ответ: { success: true, data: { removed: <число рассылок> } }
-  async _disableEmailsForAddress (address, listUnsubscribe) {
+  async _disableEmailsForAddress (address, listUnsubscribe, mailingId) {
     const headers = { 'Content-Type': 'application/json' };
     if (this.apiKey) {
       headers.Authorization = `Bearer ${this.apiKey}`;
     }
     const response = await fetch(`${this.backend}/mailings/unsubscribe`, {
-      body: JSON.stringify({ email: address, ...(listUnsubscribe ? { listUnsubscribe } : {}) }),
+      body: JSON.stringify({
+        email: address,
+        ...(listUnsubscribe ? { listUnsubscribe } : {}),
+        ...(mailingId === undefined ? {} : { mailingId })
+      }),
       headers,
       method: 'POST'
     });

@@ -60,14 +60,35 @@ class MessageClassifier {
     return false;
   }
 
-  _isUnsubscribe (message) {
-    const to = message.toAddress;
-    const username = to.split('@')[0];
-    const parts = username.split('+');
-    if (typeof parts[1] !== 'string') {
+  // Адрес вида <user>+unsubscribe или <user>+unsubscribe-<номер рассылки>
+  _parseUnsubscribe (message) {
+    const username = message.toAddress.split('@')[0];
+    const tag = username.split('+')[1];
+    if (typeof tag !== 'string') {
       return;
     }
-    return (parts[1].toLowerCase() === this.unsubscribeAdditionalAddress);
+    const word = String(this.unsubscribeAdditionalAddress).toLowerCase();
+    const lowerTag = tag.toLowerCase();
+    if (lowerTag === word) {
+      return { mailingId: undefined };
+    }
+    const match = lowerTag.startsWith(word + '-') && /^\d+$/.exec(lowerTag.slice(word.length + 1));
+    if (match) {
+      const mailingId = Number(match[0]);
+      if (Number.isSafeInteger(mailingId) && mailingId >= 1) {
+        return { mailingId };
+      }
+    }
+  }
+
+  _isUnsubscribe (message) {
+    return Boolean(this._parseUnsubscribe(message));
+  }
+
+  // Номер рассылки из адреса <user>+unsubscribe-<номер>; без номера — undefined
+  getUnsubscribeMailingId (message) {
+    const parsed = this._parseUnsubscribe(message);
+    return parsed ? parsed.mailingId : undefined;
   }
 }
 

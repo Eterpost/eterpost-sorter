@@ -50,6 +50,15 @@ describe('MailServerDatabase', function () {
     ]);
   });
 
+  it('should pass the mailing number when unsubscribing', async function () {
+    requests.length = 0;
+    assert.equal(await database.unsubscribeAddress('a@example.com', 42), true);
+    assert.deepEqual(requests, [{
+      body: { email: 'a@example.com', listUnsubscribe: true, mailingId: 42 },
+      url: '/mailings/unsubscribe'
+    }]);
+  });
+
   it('should unsubscribe only from mailings with List-Unsubscribe', async function () {
     requests.length = 0;
     assert.equal(await database.unsubscribeAddress('a@example.com'), true);

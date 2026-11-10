@@ -235,7 +235,7 @@ YAML configs are no longer supported.
     "url": "redis://localhost:6379/0",
     "prefixes": {} // optional: key prefixes, the same as in mail-server config
   },
-  "unsubscribeAdditionalAddress": "unsubscribe" // part of "unsubscribe" address after + sign
+  "unsubscribeAdditionalAddress": "unsubscribe" // part of "unsubscribe" address after + sign; the numbered form "<user>+unsubscribe-<mailing number>@" (digits only, 1 or more) is recognised too
 }
 ```
 
@@ -275,6 +275,12 @@ and by "autoreply" in message subject. Such messages are just deleted.
 #### UNSUBSCRIBE
 Requests to unsubscribe from mailing. Detected by string after `+` in target address.
 Example of such address: `noreply+unsubscribe@some.domain`. Action: mark user as unsubscribed.
+
+The numbered form `noreply+unsubscribe-42@some.domain` (the configured word, a dash and the mailing
+number: digits only, at least 1) is recognised as well: the number is passed to mail-server, so the
+address is removed only from the mailings of that mailing's space. The plain address keeps unsubscribing
+from all mailings with `List-Unsubscribe`. mail-server's `server.mail.listUnsubscribe` with `{id}` produces
+the numbered address.
 
 #### HUMAN
 Messages from humans. This category includes not only human messages, but all messages that do not belong

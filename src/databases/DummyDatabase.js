@@ -8,8 +8,10 @@ class DummyDatabase {
     return true;
   }
 
-  unsubscribeAddress (address) {
-    this.logger.debug(`DummyDatabase: unsubscribing address ${address} in mailing DB`);
+  unsubscribeAddress (address, mailingId) {
+    this.logger.debug(
+      `DummyDatabase: unsubscribing address ${address} in mailing DB (mailing ${mailingId})`
+    );
     return true;
   }
 }

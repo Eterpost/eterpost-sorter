@@ -11,8 +11,8 @@ function fakeDatabase (result) {
       this.calls.push(args);
       return result;
     },
-    async unsubscribeAddress (address) {
-      this.calls.push([address]);
+    async unsubscribeAddress (...args) {
+      this.calls.push(args);
       return result;
     }
   };
@@ -38,4 +38,11 @@ describe('MultiDatabase', function () {
       });
     });
   }
+
+  it('should pass the mailing number to every database on unsubscribe', async function () {
+    const databases = [fakeDatabase(false), fakeDatabase(true)];
+    await new MultiDatabase(databases).unsubscribeAddress('a@example.com', 42);
+    const expected = [['a@example.com', 42]];
+    assert.deepEqual(databases.map(db => db.calls), [expected, expected]);
+  });
 });

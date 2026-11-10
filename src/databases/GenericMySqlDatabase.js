@@ -36,8 +36,9 @@ class GenericMySqlDatabase {
     return Boolean(queryResult.affectedRows);
   }
 
-  async unsubscribeAddress (address) {
-    this.logger.debug('Unsubscribe emails: ' + address);
+  async unsubscribeAddress (address, mailingId) {
+    // mailingId не используется: в этой базе нет пространств рассылок
+    this.logger.debug('Unsubscribe emails: ' + address + ' (mailing ' + mailingId + ')');
     return this._performOperation(address);
   }
 
